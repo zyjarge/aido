@@ -49,8 +49,8 @@ EOL
     source venv/bin/activate
     
     info "安装依赖..."
-    pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 }
 
 # 创建启动器脚本
