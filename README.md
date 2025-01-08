@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ### MacOS 安装
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/yourusername/aido.git
+git clone https://github.com/zyjarge/aido.git
 cd aido
 
 # 2. 安装依赖
@@ -47,7 +47,7 @@ ln -s "$(pwd)/aido.py" /usr/local/bin/aido
 ### Linux 安装
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/yourusername/aido.git
+git clone https://github.com/zyjarge/aido.git
 cd aido
 
 # 2. 安装依赖
@@ -65,7 +65,7 @@ sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
 ### Windows 安装
 ```powershell
 # 1. 克隆仓库
-git clone https://github.com/yourusername/aido.git
+git clone https://github.com/zyjarge/aido.git
 cd aido
 
 # 2. 安装依赖
