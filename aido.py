@@ -20,6 +20,8 @@ INFO = "ℹ️ "
 WARNING = "🚷"
 ERROR = "❌"
 
+load_dotenv()  # 加载 .env 文件中的环境变量
+
 def print_user_message(message):
     # 创建一个面板来展示用户请求
     panel = Panel(

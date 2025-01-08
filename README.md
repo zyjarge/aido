@@ -32,24 +32,32 @@ pip install -r requirements.txt
 git clone https://github.com/yourusername/aido.git
 cd aido
 
-# 2. 配置环境变量
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 配置环境变量
 cp .env.local.example .env.local
 # 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
 
-# 3. 添加到系统路径
+# 4. 添加到系统路径
 chmod +x aido.py
 ln -s "$(pwd)/aido.py" /usr/local/bin/aido
 ```
 
 ### Linux 安装
 ```bash
-# 步骤与 MacOS 类似
+# 1. 克隆仓库
 git clone https://github.com/yourusername/aido.git
 cd aido
 
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 配置环境变量
 cp .env.local.example .env.local
 # 编辑 .env.local 文件
 
+# 4. 添加到系统路径
 chmod +x aido.py
 sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
 ```
@@ -60,15 +68,18 @@ sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
 git clone https://github.com/yourusername/aido.git
 cd aido
 
-# 2. 配置环境变量
+# 2. 安装依赖
+pip install -r requirements.txt
+
+# 3. 配置环境变量
 copy .env.local.example .env.local
 # 编辑 .env.local 文件
 
-# 3. 创建批处理文件
+# 4. 创建批处理文件
 echo @echo off > aido.bat
 echo python "%~dp0aido.py" %* >> aido.bat
 
-# 4. 添加到系统路径
+# 5. 添加到系统路径
 # 将批处理文件所在目录添加到系统环境变量 PATH 中
 ```
 
