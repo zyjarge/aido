@@ -3,13 +3,14 @@ import os
 import sys
 import json
 import logging
+import subprocess
 from dotenv import load_dotenv
 from openai import OpenAI
 from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich import print as rprint
-import pyperclip
+import clipboard
 
 console = Console()
 
@@ -61,7 +62,7 @@ def print_ai_response(command, explanation=None):
     
     # 复制到剪贴板
     try:
-        pyperclip.copy(clean_cmd)
+        clipboard.copy(clean_cmd)
         clipboard_status = f"{INFO} [green]命令已复制到剪贴板[/green]"
     except Exception as e:
         logging.warning(f"复制到剪贴板失败: {str(e)}")
