@@ -89,25 +89,48 @@ echo python "%~dp0aido.py" %* >> aido.bat
 ```bash
 # 查询命令
 aido 统计当前目录下的文件数量
+```
 
+![基本使用](./screenshots/1.png)
+
+```bash
 # 开启调试模式
 aido --debug 查找所有大于100MB的文件
 ```
+![调试模式](./screenshots/2.png)
+
+
 
 2. 示例
+
 ```bash
 # 文件操作
 aido 查找当前目录下所有的 jpg 文件
+```
+![文件操作](./screenshots/3.png)
 
+
+```bash
 # 系统信息
 aido 显示系统内存使用情况
+```
+![系统信息](./screenshots/4.png)
 
+
+
+```bash
 # 进程管理
 aido 查找占用CPU最多的5个进程
+```
+![进程管理](./screenshots/5.png)
 
+
+```bash
 # 网络操作
 aido 测试与 google.com 的连接延迟
 ```
+![网络操作](./screenshots/6.png)
+
 
 3. 特点
 - 命令会自动复制到剪贴板
