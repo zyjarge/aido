@@ -10,8 +10,6 @@ AIDO 是一个基于 AI 的命令行助手，它可以将自然语言转换为�
 - 重复查询一些常用但不容易记住的命令
 - 部分灵感来自于 [《AI帮你赢：人人都能用的AI方法论》](https://book.douban.com/subject/37152637/)
 
-
-
 AIDO 直接集成在终端中，让你可以：
 - 直接在终端中用自然语言获取命令
 - 自动复制命令到剪贴板
@@ -22,68 +20,54 @@ AIDO 直接集成在终端中，让你可以：
 
 ### 前置要求
 - Python 3.8 或更高版本
-- pip 包管理器
+- Git（用于克隆仓库）
 
-### 依赖安装
-```bash
-pip install -r requirements.txt
-```
+### 快速安装（推荐）
 
-### MacOS 安装
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/zyjarge/aido.git
 cd aido
 
-# 2. 安装依赖
-pip install -r requirements.txt
+# 2. 运行安装脚本
+./install.sh
+```
 
-# 3. 配置环境变量
+安装脚本会自动完成以下操作：
+- 检查 Python 环境
+- 创建虚拟环境
+- 安装所需依赖（使用清华大学镜像源加速）
+- 创建配置文件
+- 设置启动器
+
+安装完成后，你需要：
+1. 编辑 `~/.aido/.env.local` 文件，设置你的 `DEEPSEEK_API_KEY`
+2. 现在可以在任何目录使用 `aido` 命令了
+
+### 手动安装（不推荐）
+
+如果你不想使用安装脚本，也可以手动安装：
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/zyjarge/aido.git
+cd aido
+
+# 2. 创建虚拟环境
+python3 -m venv venv
+source venv/bin/activate
+
+# 3. 安装依赖（使用清华镜像源）
+pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 4. 配置环境变量
 cp .env.local.example .env.local
 # 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
 
-# 4. 添加到系统路径
-chmod +x aido.py
-ln -s "$(pwd)/aido.py" /usr/local/bin/aido
-```
-
-### Linux 安装
-```bash
-# 1. 克隆仓库
-git clone https://github.com/zyjarge/aido.git
-cd aido
-
-# 2. 安装依赖
-pip install -r requirements.txt
-
-# 3. 配置环境变量
-cp .env.local.example .env.local
-# 编辑 .env.local 文件
-
-# 4. 添加到系统路径
-chmod +x aido.py
-sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
-```
-
-### Windows 安装
-```powershell
-# 1. 克隆仓库
-git clone https://github.com/zyjarge/aido.git
-cd aido
-
-# 2. 安装依赖
-pip install -r requirements.txt
-
-# 3. 配置环境变量
-copy .env.local.example .env.local
-# 编辑 .env.local 文件
-
-# 4. 创建批处理文件
-echo @echo off > aido.bat
-echo python "%~dp0aido.py" %* >> aido.bat
-
 # 5. 添加到系统路径
-# 将批处理文件所在目录添加到系统环境变量 PATH 中
+sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
+chmod +x aido.py
 ```
 
 ## 使用方法
