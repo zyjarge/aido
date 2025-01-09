@@ -35,13 +35,14 @@ cd aido
 
 ### Windows 快速安装（推荐）
 
-```cmd
+```powershell
 # 1. 克隆仓库
 git clone https://github.com/zyjarge/aido.git
 cd aido
 
-# 2. 运行安装脚本
-install.bat
+# 2. 运行安装脚本（使用管理员权限的 PowerShell）
+Set-ExecutionPolicy RemoteSigned -Scope Process
+.\install.ps1
 ```
 
 安装脚本会自动完成以下操作：
@@ -59,50 +60,40 @@ install.bat
 
 如果你不想使用安装脚本，也可以手动安装：
 
-#### MacOS/Linux
-```bash
-# 1. 克隆仓库
-git clone https://github.com/zyjarge/aido.git
-cd aido
-
-# 2. 创建虚拟环境
-python3 -m venv venv
-source venv/bin/activate
-
-# 3. 安装依赖（使用清华镜像源）
-pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# 4. 配置环境变量
-cp .env.local.example .env.local
-# 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
-
-# 5. 添加到系统路径
-sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
-chmod +x aido.py
-```
-
 #### Windows
-```cmd
+```powershell
 # 1. 克隆仓库
 git clone https://github.com/zyjarge/aido.git
 cd aido
 
 # 2. 创建虚拟环境
 python -m venv venv
-call venv\Scripts\activate.bat
+.\venv\Scripts\Activate.ps1
 
 # 3. 安装依赖（使用清华镜像源）
 python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 4. 配置环境变量
-copy .env.local.example .env.local
+Copy-Item .env.local.example .env.local
 # 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
 
 # 5. 创建启动器
-echo @echo off > "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\aido.bat"
-echo python "%CD%\aido.py" %%* >> "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\aido.bat"
+$launcherPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\aido.ps1"
+@"
+# Get real installation directory
+`$AIDO_HOME = "$PWD"
+# Save current directory
+`$CURRENT_DIR = Get-Location
+# Switch to AIDO directory and activate virtual environment
+Set-Location "`$AIDO_HOME"
+& "`$AIDO_HOME\venv\Scripts\Activate.ps1"
+# Execute Python script while maintaining current directory
+Set-Location "`$CURRENT_DIR"
+python "`$AIDO_HOME\aido.py" `$args
+# Cleanup
+deactivate
+"@ | Out-File -FilePath $launcherPath -Encoding UTF8
 ```
 
 ## 使用方法
