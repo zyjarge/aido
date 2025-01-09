@@ -19,6 +19,15 @@ error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# 检查是否有 sudo 权限
+check_sudo() {
+    if sudo -n true 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # 获取脚本所在目录的绝对路径
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR"
@@ -55,7 +64,33 @@ EOL
 
 # 创建启动器脚本
 create_launcher() {
-    local launcher="/usr/local/bin/aido"
+    local launcher_dir
+    local launcher
+    
+    info "设置启动器..."
+    
+    # 检查是否有 sudo 权限
+    if check_sudo; then
+        launcher_dir="/usr/local/bin"
+        launcher="$launcher_dir/aido"
+        info "使用系统目录: $launcher_dir"
+    else
+        launcher_dir="$HOME/.local/bin"
+        launcher="$launcher_dir/aido"
+        info "使用用户目录: $launcher_dir"
+        
+        # 创建用户级的 bin 目录（如果不存在）
+        if [ ! -d "$launcher_dir" ]; then
+            mkdir -p "$launcher_dir"
+        fi
+        
+        # 确保 .local/bin 在 PATH 中
+        if [[ ":$PATH:" != *":$launcher_dir:"* ]]; then
+            warn "将 $launcher_dir 添加到 PATH..."
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+        fi
+    fi
     
     info "创建启动器脚本: $launcher"
     
@@ -84,9 +119,21 @@ python "\$AIDO_HOME/aido.py" "\$@"
 deactivate
 EOL
 
-    # 使用 sudo 移动文件并设置权限
-    sudo mv "$launcher.tmp" "$launcher"
-    sudo chmod +x "$launcher"
+    # 移动文件并设置权限
+    if check_sudo; then
+        sudo mv "$launcher.tmp" "$launcher"
+        sudo chmod +x "$launcher"
+    else
+        mv "$launcher.tmp" "$launcher"
+        chmod +x "$launcher"
+    fi
+    
+    if [ $? -eq 0 ]; then
+        info "启动器创建成功"
+    else
+        error "启动器创建失败"
+        exit 1
+    fi
 }
 
 # 检查配置文件
@@ -126,7 +173,12 @@ main() {
     echo "程序目录: $SCRIPT_DIR"
     echo "虚拟环境: $SCRIPT_DIR/venv"
     echo "配置文件: $SCRIPT_DIR/.env.local"
-    echo "启动脚本: /usr/local/bin/aido"
+    if check_sudo; then
+        echo "启动脚本: /usr/local/bin/aido"
+    else
+        echo "启动脚本: $HOME/.local/bin/aido"
+        warn "请重新打开终端或运行 'source ~/.bashrc' 使环境变量生效"
+    fi
     
     echo -e "\n${GREEN}使用说明：${NC}"
     echo "1. 请确保在 .env.local 中设置了 DEEPSEEK_API_KEY"
