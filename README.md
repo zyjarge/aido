@@ -22,27 +22,37 @@ AIDO 直接集成在终端中，让你可以：
 - Python 3.8 或更高版本
 - Git（用于克隆仓库）
 
-### MacOS/Linux 快速安装（推荐）
+### 一键安装（推荐）
 
+#### MacOS/Linux
 ```bash
-# 1. 克隆仓库
+curl -fsSL https://raw.githubusercontent.com/zyjarge/aido/main/install_remote.sh | bash
+```
+
+#### Windows
+```powershell
+# 使用管理员权限运行 PowerShell
+iwr -useb https://raw.githubusercontent.com/zyjarge/aido/main/install.bat -OutFile install.bat; .\install.bat
+```
+
+### 手动安装（从源码）
+
+#### 1. 克隆仓库
+```bash
 git clone https://github.com/zyjarge/aido.git
 cd aido
+```
 
-# 2. 运行安装脚本
+#### 2. 运行安装脚本
+
+##### MacOS/Linux
+```bash
 ./install.sh
 ```
 
-### Windows 快速安装（推荐）
-
-```powershell
-# 1. 克隆仓库
-git clone https://github.com/zyjarge/aido.git
-cd aido
-
-# 2. 运行安装脚本（使用管理员权限的 PowerShell）
-Set-ExecutionPolicy RemoteSigned -Scope Process
-.\install.ps1
+##### Windows
+```cmd
+install.bat
 ```
 
 安装脚本会自动完成以下操作：
@@ -55,46 +65,6 @@ Set-ExecutionPolicy RemoteSigned -Scope Process
 安装完成后，你需要：
 1. 编辑 `.env.local` 文件，设置你的 `DEEPSEEK_API_KEY`
 2. 现在可以在任何目录使用 `aido` 命令了
-
-### 手动安装（不推荐）
-
-如果你不想使用安装脚本，也可以手动安装：
-
-#### Windows
-```powershell
-# 1. 克隆仓库
-git clone https://github.com/zyjarge/aido.git
-cd aido
-
-# 2. 创建虚拟环境
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-
-# 3. 安装依赖（使用清华镜像源）
-python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# 4. 配置环境变量
-Copy-Item .env.local.example .env.local
-# 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
-
-# 5. 创建启动器
-$launcherPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\aido.ps1"
-@"
-# Get real installation directory
-`$AIDO_HOME = "$PWD"
-# Save current directory
-`$CURRENT_DIR = Get-Location
-# Switch to AIDO directory and activate virtual environment
-Set-Location "`$AIDO_HOME"
-& "`$AIDO_HOME\venv\Scripts\Activate.ps1"
-# Execute Python script while maintaining current directory
-Set-Location "`$CURRENT_DIR"
-python "`$AIDO_HOME\aido.py" `$args
-# Cleanup
-deactivate
-"@ | Out-File -FilePath $launcherPath -Encoding UTF8
-```
 
 ## 使用方法
 
