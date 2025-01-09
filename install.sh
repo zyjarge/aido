@@ -22,8 +22,10 @@ error() {
 # 检查是否有 sudo 权限
 check_sudo() {
     if sudo -n true 2>/dev/null; then
+        info "检测到 sudo 权限"
         return 0
     else
+        warn "未检测到 sudo 权限，将使用用户目录安装"
         return 1
     fi
 }
@@ -69,25 +71,20 @@ create_launcher() {
     
     info "设置启动器..."
     
-    # 检查是否有 sudo 权限
-    if check_sudo; then
-        launcher_dir="/usr/local/bin"
-        launcher="$launcher_dir/aido"
-        info "使用系统目录: $launcher_dir"
-    else
-        launcher_dir="$HOME/.local/bin"
-        launcher="$launcher_dir/aido"
-        info "使用用户目录: $launcher_dir"
-        
-        # 创建用户级的 bin 目录（如果不存在）
-        if [ ! -d "$launcher_dir" ]; then
-            mkdir -p "$launcher_dir"
-        fi
-        
-        # 确保 .local/bin 在 PATH 中
-        if [[ ":$PATH:" != *":$launcher_dir:"* ]]; then
-            warn "将 $launcher_dir 添加到 PATH..."
-            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+    # 默认使用用户目录
+    launcher_dir="$HOME/.local/bin"
+    launcher="$launcher_dir/aido"
+    
+    # 创建用户级的 bin 目录（如果不存在）
+    if [ ! -d "$launcher_dir" ]; then
+        mkdir -p "$launcher_dir"
+    fi
+    
+    # 确保 .local/bin 在 PATH 中
+    if [[ ":$PATH:" != *":$launcher_dir:"* ]]; then
+        warn "将 $launcher_dir 添加到 PATH..."
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+        if [ -f "$HOME/.zshrc" ]; then
             echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
         fi
     fi
@@ -95,7 +92,7 @@ create_launcher() {
     info "创建启动器脚本: $launcher"
     
     # 创建启动器
-    cat > "$launcher.tmp" << EOL
+    cat > "$launcher" << EOL
 #!/bin/bash
 
 # 获取真实的安装目录
@@ -119,14 +116,8 @@ python "\$AIDO_HOME/aido.py" "\$@"
 deactivate
 EOL
 
-    # 移动文件并设置权限
-    if check_sudo; then
-        sudo mv "$launcher.tmp" "$launcher"
-        sudo chmod +x "$launcher"
-    else
-        mv "$launcher.tmp" "$launcher"
-        chmod +x "$launcher"
-    fi
+    # 设置权限
+    chmod +x "$launcher"
     
     if [ $? -eq 0 ]; then
         info "启动器创建成功"
@@ -173,17 +164,15 @@ main() {
     echo "程序目录: $SCRIPT_DIR"
     echo "虚拟环境: $SCRIPT_DIR/venv"
     echo "配置文件: $SCRIPT_DIR/.env.local"
-    if check_sudo; then
-        echo "启动脚本: /usr/local/bin/aido"
-    else
-        echo "启动脚本: $HOME/.local/bin/aido"
-        warn "请重新打开终端或运行 'source ~/.bashrc' 使环境变量生效"
-    fi
+    echo "启动脚本: $HOME/.local/bin/aido"
     
     echo -e "\n${GREEN}使用说明：${NC}"
     echo "1. 请确保在 .env.local 中设置了 DEEPSEEK_API_KEY"
-    echo "2. 现在可以在任何目录使用 'aido' 命令了"
-    echo "3. 示例: aido '查看当前目录下的文件'"
+    echo "2. 请运行以下命令使环境变量生效："
+    echo "   source ~/.bashrc  # 如果使用 bash"
+    echo "   source ~/.zshrc   # 如果使用 zsh"
+    echo "3. 现在可以在任何目录使用 'aido' 命令了"
+    echo "4. 示例: aido '查看当前目录下的文件'"
     
     # 提示激活虚拟环境（如果需要直接使用 Python 环境）
     echo -e "\n${YELLOW}提示：${NC}"
