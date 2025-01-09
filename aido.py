@@ -3,13 +3,14 @@ import os
 import sys
 import json
 import logging
+import subprocess
 from dotenv import load_dotenv
 from openai import OpenAI
 from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich import print as rprint
-import pyperclip
+import clipboard
 
 console = Console()
 
@@ -20,7 +21,33 @@ INFO = "ℹ️ "
 WARNING = "🚷"
 ERROR = "❌"
 
-load_dotenv()  # 加载 .env 文件中的环境变量
+def get_env_file_path():
+    """获取环境文件的路径"""
+    # 优先使用环境变量中的 AIDO_HOME
+    aido_home = os.environ.get('AIDO_HOME')
+    if not aido_home:
+        # 如果环境变量未设置，使用脚本所在目录
+        aido_home = os.path.dirname(os.path.abspath(__file__))
+    
+    env_file = os.path.join(aido_home, '.env.local')
+    
+    if not os.path.exists(env_file):
+        logging.warning(f"配置文件不存在: {env_file}")
+        # 创建默认配置
+        with open(env_file, 'w') as f:
+            f.write('LOG_LEVEL=INFO\n')
+            f.write('# DEEPSEEK_API_KEY=your_api_key_here\n')
+        logging.warning(f"已创建默认配置文件，请设置你的 API key")
+    
+    return env_file
+
+def load_env_config():
+    """加载环境配置"""
+    env_path = get_env_file_path()
+    if os.path.exists(env_path):
+        load_dotenv(env_path, override=True)
+        return True
+    return False
 
 def print_user_message(message):
     # 创建一个面板来展示用户请求
@@ -61,7 +88,7 @@ def print_ai_response(command, explanation=None):
     
     # 复制到剪贴板
     try:
-        pyperclip.copy(clean_cmd)
+        clipboard.copy(clean_cmd)
         clipboard_status = f"{INFO} [green]命令已复制到剪贴板[/green]"
     except Exception as e:
         logging.warning(f"复制到剪贴板失败: {str(e)}")
@@ -105,8 +132,10 @@ def print_ai_response(command, explanation=None):
 
 # 配置日志
 def setup_logging(level=None):
-    # 从环境变量文件读取默认日志级别
-    load_dotenv('.env.local')
+    # 加载环境配置
+    load_env_config()
+    
+    # 从环境变量获取日志级别
     default_level = os.getenv('LOG_LEVEL', 'INFO').upper()
     
     # 如果没有指定level参数，使用环境变量中的设置
@@ -142,17 +171,14 @@ def clean_json_string(text):
 def get_command_suggestion(query):
     logging.debug(f"开始处理查询: {query}")
     
-    # 首先从 .env.local 文件获取
-    load_dotenv('.env.local')
+    # 每次执行都重新加载环境配置
+    load_env_config()
+    
+    # 获取 API key
     api_key = os.getenv('DEEPSEEK_API_KEY')
     
-    # 如果配置文件中没有，尝试从环境变量获取
     if not api_key:
-        logging.debug("从配置文件获取 API key 失败，尝试从环境变量获取")
-        api_key = os.environ.get('DEEPSEEK_API_KEY')
-    
-    if not api_key:
-        error_msg = "未找到 DEEPSEEK_API_KEY，请在 .env.local 文件中配置或设置环境变量"
+        error_msg = "未找到 DEEPSEEK_API_KEY，请确保在 .env.local 文件中正确配置"
         logging.error(error_msg)
         raise Exception(error_msg)
     
@@ -162,7 +188,7 @@ def get_command_suggestion(query):
         base_url="https://api.deepseek.com/v1"  # DeepSeek API 基础 URL
     )
     
-    prompt = f"""将以下操作转换为MacOS命令：
+    prompt = f"""将以下操作转换为命令：
     {query}
     
     要求：
@@ -175,7 +201,8 @@ def get_command_suggestion(query):
        - 如果有多个命令，每行一个
     3. explanation 字段：
        - 用中文简明扼要地解释命令的作用
-       - 如果有特殊参数，简单说明其含义"""
+       - 如果有特殊参数，简单说明其含义
+    4. 如果明确平台信息，请直接给出该平台的指令，如果没有平台信息，请给出通用的指令或者按平台分别给出。"""
     
     try:
         logging.debug("发送请求到 DeepSeek API")

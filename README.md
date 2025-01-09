@@ -8,6 +8,7 @@ AIDO 是一个基于 AI 的命令行助手，它可以将自然语言转换为�
 - 在浏览器中打开 AI 网站查询命令
 - 在不同窗口间切换复制粘贴
 - 重复查询一些常用但不容易记住的命令
+- 部分灵感来自于 [《AI帮你赢：人人都能用的AI方法论》](https://book.douban.com/subject/37152637/)
 
 AIDO 直接集成在终端中，让你可以：
 - 直接在终端中用自然语言获取命令
@@ -19,68 +20,80 @@ AIDO 直接集成在终端中，让你可以：
 
 ### 前置要求
 - Python 3.8 或更高版本
-- pip 包管理器
+- Git（用于克隆仓库）
 
-### 依赖安装
-```bash
-pip install -r requirements.txt
-```
+### MacOS/Linux 快速安装（推荐）
 
-### MacOS 安装
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/zyjarge/aido.git
 cd aido
 
-# 2. 安装依赖
-pip install -r requirements.txt
-
-# 3. 配置环境变量
-cp .env.local.example .env.local
-# 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
-
-# 4. 添加到系统路径
-chmod +x aido.py
-ln -s "$(pwd)/aido.py" /usr/local/bin/aido
+# 2. 运行安装脚本
+./install.sh
 ```
 
-### Linux 安装
-```bash
-# 1. 克隆仓库
-git clone https://github.com/zyjarge/aido.git
-cd aido
+### Windows 快速安装（推荐）
 
-# 2. 安装依赖
-pip install -r requirements.txt
-
-# 3. 配置环境变量
-cp .env.local.example .env.local
-# 编辑 .env.local 文件
-
-# 4. 添加到系统路径
-chmod +x aido.py
-sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
-```
-
-### Windows 安装
 ```powershell
 # 1. 克隆仓库
 git clone https://github.com/zyjarge/aido.git
 cd aido
 
-# 2. 安装依赖
-pip install -r requirements.txt
+# 2. 运行安装脚本（使用管理员权限的 PowerShell）
+Set-ExecutionPolicy RemoteSigned -Scope Process
+.\install.ps1
+```
 
-# 3. 配置环境变量
-copy .env.local.example .env.local
-# 编辑 .env.local 文件
+安装脚本会自动完成以下操作：
+- 检查 Python 环境
+- 创建虚拟环境
+- 安装所需依赖（使用清华大学镜像源加速）
+- 创建配置文件
+- 设置启动器
 
-# 4. 创建批处理文件
-echo @echo off > aido.bat
-echo python "%~dp0aido.py" %* >> aido.bat
+安装完成后，你需要：
+1. 编辑 `.env.local` 文件，设置你的 `DEEPSEEK_API_KEY`
+2. 现在可以在任何目录使用 `aido` 命令了
 
-# 5. 添加到系统路径
-# 将批处理文件所在目录添加到系统环境变量 PATH 中
+### 手动安装（不推荐）
+
+如果你不想使用安装脚本，也可以手动安装：
+
+#### Windows
+```powershell
+# 1. 克隆仓库
+git clone https://github.com/zyjarge/aido.git
+cd aido
+
+# 2. 创建虚拟环境
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# 3. 安装依赖（使用清华镜像源）
+python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 4. 配置环境变量
+Copy-Item .env.local.example .env.local
+# 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
+
+# 5. 创建启动器
+$launcherPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\aido.ps1"
+@"
+# Get real installation directory
+`$AIDO_HOME = "$PWD"
+# Save current directory
+`$CURRENT_DIR = Get-Location
+# Switch to AIDO directory and activate virtual environment
+Set-Location "`$AIDO_HOME"
+& "`$AIDO_HOME\venv\Scripts\Activate.ps1"
+# Execute Python script while maintaining current directory
+Set-Location "`$CURRENT_DIR"
+python "`$AIDO_HOME\aido.py" `$args
+# Cleanup
+deactivate
+"@ | Out-File -FilePath $launcherPath -Encoding UTF8
 ```
 
 ## 使用方法
@@ -89,25 +102,48 @@ echo python "%~dp0aido.py" %* >> aido.bat
 ```bash
 # 查询命令
 aido 统计当前目录下的文件数量
+```
 
+![基本使用](./screenshots/1.png)
+
+```bash
 # 开启调试模式
 aido --debug 查找所有大于100MB的文件
 ```
+![调试模式](./screenshots/2.png)
+
+
 
 2. 示例
+
 ```bash
 # 文件操作
 aido 查找当前目录下所有的 jpg 文件
+```
+![文件操作](./screenshots/3.png)
 
+
+```bash
 # 系统信息
 aido 显示系统内存使用情况
+```
+![系统信息](./screenshots/4.png)
 
+
+
+```bash
 # 进程管理
 aido 查找占用CPU最多的5个进程
+```
+![进程管理](./screenshots/5.png)
 
+
+```bash
 # 网络操作
 aido 测试与 google.com 的连接延迟
 ```
+![网络操作](./screenshots/6.png)
+
 
 3. 特点
 - 命令会自动复制到剪贴板
