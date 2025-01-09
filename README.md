@@ -26,13 +26,13 @@ AIDO 直接集成在终端中，让你可以：
 
 #### MacOS/Linux
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zyjarge/aido/main/install_remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/zyjarge/aido/master/install_remote.sh | bash
 ```
 
 #### Windows
 ```powershell
 # 使用管理员权限运行 PowerShell
-iwr -useb https://raw.githubusercontent.com/zyjarge/aido/main/install.bat -OutFile install.bat; .\install.bat
+iwr -useb https://raw.githubusercontent.com/zyjarge/aido/master/install.bat -OutFile install.bat; .\install.bat
 ```
 
 ### 手动安装（从源码）
