@@ -188,7 +188,7 @@ def get_command_suggestion(query):
         base_url="https://api.deepseek.com/v1"  # DeepSeek API 基础 URL
     )
     
-    prompt = f"""将以下操作转换为MacOS命令：
+    prompt = f"""将以下操作转换为命令：
     {query}
     
     要求：
@@ -201,7 +201,8 @@ def get_command_suggestion(query):
        - 如果有多个命令，每行一个
     3. explanation 字段：
        - 用中文简明扼要地解释命令的作用
-       - 如果有特殊参数，简单说明其含义"""
+       - 如果有特殊参数，简单说明其含义
+    4. 如果明确平台信息，请直接给出该平台的指令，如果没有平台信息，请给出通用的指令或者按平台分别给出。"""
     
     try:
         logging.debug("发送请求到 DeepSeek API")
