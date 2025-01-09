@@ -22,7 +22,7 @@ AIDO 直接集成在终端中，让你可以：
 - Python 3.8 或更高版本
 - Git（用于克隆仓库）
 
-### 快速安装（推荐）
+### MacOS/Linux 快速安装（推荐）
 
 ```bash
 # 1. 克隆仓库
@@ -33,6 +33,17 @@ cd aido
 ./install.sh
 ```
 
+### Windows 快速安装（推荐）
+
+```cmd
+# 1. 克隆仓库
+git clone https://github.com/zyjarge/aido.git
+cd aido
+
+# 2. 运行安装脚本
+install.bat
+```
+
 安装脚本会自动完成以下操作：
 - 检查 Python 环境
 - 创建虚拟环境
@@ -41,13 +52,14 @@ cd aido
 - 设置启动器
 
 安装完成后，你需要：
-1. 编辑 `~/.aido/.env.local` 文件，设置你的 `DEEPSEEK_API_KEY`
+1. 编辑 `.env.local` 文件，设置你的 `DEEPSEEK_API_KEY`
 2. 现在可以在任何目录使用 `aido` 命令了
 
 ### 手动安装（不推荐）
 
 如果你不想使用安装脚本，也可以手动安装：
 
+#### MacOS/Linux
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/zyjarge/aido.git
@@ -68,6 +80,29 @@ cp .env.local.example .env.local
 # 5. 添加到系统路径
 sudo ln -s "$(pwd)/aido.py" /usr/local/bin/aido
 chmod +x aido.py
+```
+
+#### Windows
+```cmd
+# 1. 克隆仓库
+git clone https://github.com/zyjarge/aido.git
+cd aido
+
+# 2. 创建虚拟环境
+python -m venv venv
+call venv\Scripts\activate.bat
+
+# 3. 安装依赖（使用清华镜像源）
+python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 4. 配置环境变量
+copy .env.local.example .env.local
+# 编辑 .env.local 文件，添加你的 DEEPSEEK_API_KEY
+
+# 5. 创建启动器
+echo @echo off > "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\aido.bat"
+echo python "%CD%\aido.py" %%* >> "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\aido.bat"
 ```
 
 ## 使用方法
