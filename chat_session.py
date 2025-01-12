@@ -121,7 +121,7 @@ class ChatSession:
         
         # 设置消息的样式和对齐方式
         align = "right" if is_user else "left"
-        style = Style(color="white", bgcolor="blue" if is_user else "green")
+        style = Style(color="white") if is_user else Style(color="white", bgcolor="green")
         emoji = "🙎" if is_user else "😄"
         timestamp = time.strftime("%H:%M:%S")
         
