@@ -21,12 +21,24 @@ error() {
 
 # 设置安装目录
 INSTALL_DIR="$HOME/aido"
+REPO_URL="https://github.com/zyjarge/aido.git"
 
-# 检查 Python 环境
-check_python() {
-    info "检查 Python 环境..."
+# 检查依赖
+check_dependencies() {
+    info "检查依赖..."
+    local missing_deps=()
+    
+    if ! command -v git &> /dev/null; then
+        missing_deps+=("git")
+    fi
+    
     if ! command -v python3 &> /dev/null; then
-        error "Python3 未安装"
+        missing_deps+=("python3")
+    fi
+    
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        error "以下依赖未安装: ${missing_deps[*]}"
+        error "请先安装这些依赖后再运行安装脚本"
         exit 1
     fi
 }
@@ -34,15 +46,24 @@ check_python() {
 # 准备安装目录
 prepare_install_dir() {
     info "准备安装目录..."
+    # 如果存在旧的安装，先清理
+    if [ -L "$HOME/.local/bin/aido" ]; then
+        info "清理旧的安装..."
+        rm -f "$HOME/.local/bin/aido"
+    fi
+    
     if [ -d "$INSTALL_DIR" ]; then
         warn "目录 $INSTALL_DIR 已存在，将备份为 ${INSTALL_DIR}.bak"
         mv "$INSTALL_DIR" "${INSTALL_DIR}.bak"
     fi
-    mkdir -p "$INSTALL_DIR"
     
-    # 复制所有文件到安装目录
-    cp -r . "$INSTALL_DIR"
-    cd "$INSTALL_DIR"
+    info "克隆项目仓库..."
+    if ! git clone "$REPO_URL" "$INSTALL_DIR"; then
+        error "克隆仓库失败"
+        exit 1
+    fi
+    
+    cd "$INSTALL_DIR" || exit 1
 }
 
 # 创建并激活虚拟环境
@@ -62,14 +83,28 @@ EOL
     source venv/bin/activate
     
     info "安装依赖..."
-    pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
-    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+    # 检查网络连接
+    if ping -c 1 pypi.tuna.tsinghua.edu.cn &> /dev/null; then
+        PIP_MIRROR="-i https://pypi.tuna.tsinghua.edu.cn/simple"
+    else
+        warn "无法连接到清华镜像源，将使用默认源"
+        PIP_MIRROR=""
+    fi
+    
+    pip install --upgrade pip $PIP_MIRROR
+    pip install -r requirements.txt $PIP_MIRROR
 }
 
 # 创建启动器脚本
 create_launcher() {
     local bin_dir="$HOME/.local/bin"
     local launcher="$bin_dir/aido"
+    
+    # 检查目录权限
+    if [ ! -w "$HOME/.local" ] || ([ -d "$bin_dir" ] && [ ! -w "$bin_dir" ]); then
+        error "没有写入 ~/.local/bin 的权限"
+        exit 1
+    }
     
     info "创建启动器脚本: $launcher"
     
@@ -131,8 +166,8 @@ setup_config() {
 main() {
     info "开始安装 aido..."
     
-    # 检查 Python
-    check_python
+    # 检查依赖
+    check_dependencies
     
     # 准备安装目录
     prepare_install_dir
