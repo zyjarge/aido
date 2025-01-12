@@ -104,7 +104,7 @@ create_launcher() {
     if [ ! -w "$HOME/.local" ] || ([ -d "$bin_dir" ] && [ ! -w "$bin_dir" ]); then
         error "没有写入 ~/.local/bin 的权限"
         exit 1
-    }
+    fi
     
     info "创建启动器脚本: $launcher"
     
