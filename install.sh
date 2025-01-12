@@ -19,9 +19,8 @@ error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 获取脚本所在目录的绝对路径
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR"
+# 设置安装目录
+INSTALL_DIR="$HOME/aido"
 
 # 检查 Python 环境
 check_python() {
@@ -30,6 +29,20 @@ check_python() {
         error "Python3 未安装"
         exit 1
     fi
+}
+
+# 准备安装目录
+prepare_install_dir() {
+    info "准备安装目录..."
+    if [ -d "$INSTALL_DIR" ]; then
+        warn "目录 $INSTALL_DIR 已存在，将备份为 ${INSTALL_DIR}.bak"
+        mv "$INSTALL_DIR" "${INSTALL_DIR}.bak"
+    fi
+    mkdir -p "$INSTALL_DIR"
+    
+    # 复制所有文件到安装目录
+    cp -r . "$INSTALL_DIR"
+    cd "$INSTALL_DIR"
 }
 
 # 创建并激活虚拟环境
@@ -55,16 +68,20 @@ EOL
 
 # 创建启动器脚本
 create_launcher() {
-    local launcher="/usr/local/bin/aido"
+    local bin_dir="$HOME/.local/bin"
+    local launcher="$bin_dir/aido"
     
     info "创建启动器脚本: $launcher"
     
+    # 创建 bin 目录（如果不存在）
+    mkdir -p "$bin_dir"
+    
     # 创建启动器
-    cat > "$launcher.tmp" << EOL
+    cat > "$launcher" << EOL
 #!/bin/bash
 
 # 获取真实的安装目录
-AIDO_HOME="$SCRIPT_DIR"
+AIDO_HOME="$INSTALL_DIR"
 
 # 保存当前目录
 CURRENT_DIR="\$(pwd)"
@@ -84,18 +101,24 @@ python "\$AIDO_HOME/aido.py" "\$@"
 deactivate
 EOL
 
-    # 使用 sudo 移动文件并设置权限
-    sudo mv "$launcher.tmp" "$launcher"
-    sudo chmod +x "$launcher"
+    # 设置执行权限
+    chmod +x "$launcher"
+    
+    # 检查 PATH 中是否包含 ~/.local/bin
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        warn "请将 ~/.local/bin 添加到你的 PATH 环境变量中"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+    fi
 }
 
 # 检查配置文件
 setup_config() {
-    local config_file="$SCRIPT_DIR/.env.local"
+    local config_file="$INSTALL_DIR/.env.local"
     
     if [ ! -f "$config_file" ]; then
         info "创建默认配置文件..."
-        echo "LOG_LEVEL=INFO" > "$config_file"
+        echo "LOG_LEVEL=CRITICAL" > "$config_file"
         echo "# DEEPSEEK_API_KEY=your_api_key_here" >> "$config_file"
         warn "请记得在 $config_file 中设置你的 DEEPSEEK_API_KEY"
     fi
@@ -111,6 +134,9 @@ main() {
     # 检查 Python
     check_python
     
+    # 准备安装目录
+    prepare_install_dir
+    
     # 设置虚拟环境
     setup_venv
     
@@ -123,20 +149,22 @@ main() {
     # 安装完成，显示信息
     echo -e "\n${GREEN}安装完成！${NC}"
     echo -e "\n${GREEN}安装信息：${NC}"
-    echo "程序目录: $SCRIPT_DIR"
-    echo "虚拟环境: $SCRIPT_DIR/venv"
-    echo "配置文件: $SCRIPT_DIR/.env.local"
-    echo "启动脚本: /usr/local/bin/aido"
+    echo "程序目录: $INSTALL_DIR"
+    echo "虚拟环境: $INSTALL_DIR/venv"
+    echo "配置文件: $INSTALL_DIR/.env.local"
+    echo "启动脚本: $HOME/.local/bin/aido"
     
     echo -e "\n${GREEN}使用说明：${NC}"
     echo "1. 请确保在 .env.local 中设置了 DEEPSEEK_API_KEY"
-    echo "2. 现在可以在任何目录使用 'aido' 命令了"
-    echo "3. 示例: aido '查看当前目录下的文件'"
+    echo "2. 如果命令 'aido' 无法运行，请重新打开终端或运行："
+    echo "   source ~/.bashrc 或 source ~/.zshrc"
+    echo "3. 现在可以在任何目录使用 'aido' 命令了"
+    echo "4. 示例: aido '查看当前目录下的文件'"
     
     # 提示激活虚拟环境（如果需要直接使用 Python 环境）
     echo -e "\n${YELLOW}提示：${NC}"
     echo "如果需要直接使用 Python 环境，可以运行："
-    echo "source $SCRIPT_DIR/activate_venv.sh"
+    echo "source $INSTALL_DIR/activate_venv.sh"
 }
 
 # 执行安装
