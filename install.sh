@@ -27,18 +27,65 @@ REPO_URL="https://github.com/zyjarge/aido.git"
 check_dependencies() {
     info "检查依赖..."
     local missing_deps=()
+    local need_apt_update=false
     
     if ! command -v git &> /dev/null; then
         missing_deps+=("git")
+        need_apt_update=true
     fi
     
     if ! command -v python3 &> /dev/null; then
         missing_deps+=("python3")
+        need_apt_update=true
+    fi
+
+    # 检查 python3-venv
+    if ! python3 -c "import venv" &> /dev/null; then
+        missing_deps+=("python3-venv")
+        need_apt_update=true
     fi
     
+    # 如果有缺失的依赖
     if [ ${#missing_deps[@]} -ne 0 ]; then
-        error "以下依赖未安装: ${missing_deps[*]}"
-        error "请先安装这些依赖后再运行安装脚本"
+        if [ -f "/etc/debian_version" ] || [ -f "/etc/lsb-release" ]; then
+            # Debian/Ubuntu 系统
+            warn "以下依赖未安装: ${missing_deps[*]}"
+            info "尝试自动安装依赖..."
+            
+            if [ "$need_apt_update" = true ]; then
+                if ! sudo apt-get update; then
+                    error "更新软件源失败，请手动安装依赖"
+                    exit 1
+                fi
+            fi
+            
+            if ! sudo apt-get install -y "${missing_deps[@]}"; then
+                error "安装依赖失败，请手动安装：${missing_deps[*]}"
+                exit 1
+            fi
+        else
+            # 其他系统
+            error "以下依赖未安装: ${missing_deps[*]}"
+            error "请先安装这些依赖后再运行安装脚本"
+            exit 1
+        fi
+    fi
+}
+
+# 准备用户目录
+prepare_user_dirs() {
+    info "准备用户目录..."
+    
+    # 创建 ~/.local 和 ~/.local/bin 目录（如果不存在）
+    mkdir -p "$HOME/.local/bin"
+    
+    # 确保目录权限正确
+    chmod 755 "$HOME/.local"
+    chmod 755 "$HOME/.local/bin"
+    
+    # 检查目录是否创建成功
+    if [ ! -d "$HOME/.local/bin" ]; then
+        error "无法创建必要的目录结构"
         exit 1
     fi
 }
@@ -168,6 +215,9 @@ main() {
     
     # 检查依赖
     check_dependencies
+    
+    # 准备用户目录
+    prepare_user_dirs
     
     # 准备安装目录
     prepare_install_dir
