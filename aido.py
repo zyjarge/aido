@@ -9,7 +9,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.text import Text
+from rich.prompt import Confirm
 from chat_session import ChatSession
+from updater import UpdateManager
 
 console = Console()
 
@@ -96,8 +98,27 @@ def handle_single_query(query):
     # 显示AI响应
     chat._display_message(response)
 
+def check_for_updates():
+    """检查更新"""
+    updater = UpdateManager()
+    has_update, message = updater.check_update()
+    if has_update:
+        console.print(message)
+        if Confirm.ask("是否要进行更新？"):
+            if updater.update():
+                console.print("[green]更新已完成，请在新的终端中测试新版本。[/green]")
+                if Confirm.ask("新版本测试是否成功？"):
+                    console.print("[green]更新成功！旧版本备份已清理。[/green]")
+                else:
+                    console.print("[yellow]如需回滚到旧版本，请使用备份文件。[/yellow]")
+            else:
+                console.print("[red]更新失败，保持当前版本。[/red]")
+
 def main():
     """主程序入口"""
+    # 检查更新
+    check_for_updates()
+    
     # 设置日志
     setup_logging()
     
