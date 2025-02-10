@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 
-## [v1.3.1] - 2025-02-10
+## [v1.3.2] - 2025-02-10
 
 ### 新特性 ✨
 优化自动升级脚本。
