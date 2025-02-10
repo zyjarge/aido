@@ -22,7 +22,9 @@ AIDO 直接集成在终端中，让你可以：
 ### 前置要求
 - Python 3.8 或更高版本
 - Git（用于克隆仓库）
-- [DeepSeek账号](https://platform.deepseek.com/)（需注册并确保账户余额充足）
+- 支持的 API 服务之一：
+  - [DeepSeek](https://platform.deepseek.com/)
+  - [SiliconFlow](https://docs.siliconflow.cn/)
 - curl（用于安装脚本）
 
 ### 快速安装（推荐）
@@ -46,8 +48,53 @@ iwr -useb https://raw.githubusercontent.com/zyjarge/aido/master/install.ps1 | ie
 - 设置启动器
 
 安装完成后，你需要：
-1. 编辑 `.env.local` 文件，设置你的 `DEEPSEEK_API_KEY`（在 [DeepSeek平台](https://platform.deepseek.com/api_keys) 获取）
+1. 编辑 `.env.local` 文件，配置以下信息：
+   - `BASE_URL`: API 服务地址
+   - `MODEL_NAME`: 使用的模型名称
+   - `API_KEY`: API 密钥
 2. 现在可以在任何目录使用 `aido` 命令了
+
+## 配置说明
+
+在 `.env.local` 文件中可以配置：
+
+### DeepSeek API 配置示例
+```bash
+BASE_URL=https://api.deepseek.com/v1
+MODEL_NAME=deepseek-chat
+API_KEY=your_api_key_here
+```
+
+### SiliconFlow API 配置示例
+```bash
+BASE_URL=https://api.siliconflow.com/v1
+MODEL_NAME=chatglm3-6b
+API_KEY=your_api_key_here
+```
+
+### 其他配置
+```bash
+# 日志级别：DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_LEVEL=CRITICAL
+```
+
+## 支持的 API 服务
+
+AIDO 目前支持以下 API 服务：
+
+### 1. DeepSeek API
+- 官网：https://platform.deepseek.com
+- 特点：稳定性好，响应速度快
+- 默认模型：deepseek-chat
+
+### 2. SiliconFlow API
+- 官网：https://docs.siliconflow.cn
+- 特点：支持模型多，本地部署快
+- 可用模型：
+  - chatglm3-6b
+  - qwen-7b-chat
+  - baichuan2-13b
+  等
 
 ## 使用方法
 
@@ -111,17 +158,6 @@ $ aido
 - 优雅的界面展示
 - 智能的上下文理解
 
-## 配置说明
-
-在 `.env.local` 文件中可以配置：
-```bash
-# DeepSeek API 密钥
-DEEPSEEK_API_KEY=your_api_key_here
-
-# 日志级别：DEBUG, INFO, WARNING, ERROR, CRITICAL
-LOG_LEVEL=CRITICAL
-```
-
 ## 注意事项
 
 1. 需要有效的 DeepSeek API key
@@ -142,7 +178,6 @@ LOG_LEVEL=CRITICAL
 # 运行卸载命令
 rm -f ~/.local/bin/aido && rm -rf ~/aido
 ```
-
 
 3. 清理环境变量（可选）：
 - 如果你不再需要 `~/.local/bin` 目录用于其他程序，可以从 PATH 中移除：

@@ -58,14 +58,20 @@ class ChatSession:
         })
 
     def _init_client(self):
-        """初始化DeepSeek API客户端"""
-        api_key = os.getenv('DEEPSEEK_API_KEY')
+        """初始化API客户端"""
+        api_key = os.getenv('API_KEY')
+        base_url = os.getenv('BASE_URL', 'https://api.deepseek.com/v1')  # 默认使用DeepSeek
+        model_name = os.getenv('MODEL_NAME', 'deepseek-chat')  # 默认使用deepseek-chat模型
+        
         if not api_key:
-            raise Exception("未找到 DEEPSEEK_API_KEY，请确保在 .env.local 文件中正确配置")
+            raise Exception("未找到 API_KEY，请确保在 .env.local 文件中正确配置")
+            
         self.client = OpenAI(
             api_key=api_key,
-            base_url="https://api.deepseek.com/v1"
+            base_url=base_url
         )
+        
+        self.model = model_name
 
     def _format_ai_message(self, message):
         """格式化AI消息"""
@@ -163,14 +169,21 @@ class ChatSession:
             live.update(Text(f"{thinking_msg}", style="bold green"))
             
             # 获取AI响应
-            response = self.client.chat.completions.create(
-                model="deepseek-chat",
-                messages=self.messages,
-                temperature=0.3,
-                stream=False
-            )
-            
-            return response.choices[0].message.content
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=self.messages,
+                    temperature=0.3,
+                    stream=False
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                error_msg = f"API调用失败: {str(e)}\n提示：请检查 BASE_URL 和 MODEL_NAME 配置是否正确"
+                logging.error(error_msg)
+                return json.dumps({
+                    "command": "",
+                    "explanation": error_msg
+                }, ensure_ascii=False)
 
     def start(self):
         """启动聊天会话"""
