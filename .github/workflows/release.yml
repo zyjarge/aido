@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*' # 当推送 v 开头的标签时触发，如 v1.1.0
+      - 'v*' # 当推送 v 开头的标签时触发，如 v1.2.0
 
 jobs:
   release:
@@ -11,44 +11,66 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: 检出代码
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # 获取完整的 git 历史用于生成变更日志
 
-      - name: Get version from tag
+      - name: 从标签获取版本号
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Get Changelog Entry
+      - name: 读取变更日志
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ steps.get_version.outputs.VERSION }}
           path: ./CHANGELOG.md
 
-      - name: Create Release
+      - name: 创建 Release
         uses: softprops/action-gh-release@v1
         with:
           name: AIDO ${{ steps.get_version.outputs.VERSION }}
           body: |
-            # AIDO ${{ steps.get_version.outputs.VERSION }}
-            
+            # AIDO ${{ steps.get_version.outputs.VERSION }} 发布说明 🎉
+
             ${{ steps.changelog_reader.outputs.changes }}
             
-            ## 安装方法
+            ## 安装方法 🚀
             
+            ### MacOS/Linux
             ```bash
-            # MacOS/Linux
             curl -fsSL https://raw.githubusercontent.com/zyjarge/aido/master/install.sh | bash
+            ```
             
-            # Windows (在管理员权限的 PowerShell 中运行)
+            ### Windows
+            在管理员权限的 PowerShell 中运行：
+            ```powershell
             Set-ExecutionPolicy RemoteSigned -Scope Process
             iwr -useb https://raw.githubusercontent.com/zyjarge/aido/master/install.ps1 | iex
             ```
             
-            ## 文档
+            ## 配置说明 ⚙️
+            
+            ### DeepSeek API
+            ```bash
+            BASE_URL=https://api.deepseek.com/v1
+            MODEL_NAME=deepseek-chat
+            API_KEY=your_api_key_here
+            ```
+            
+            ### SiliconFlow API
+            ```bash
+            BASE_URL=https://api.siliconflow.com/v1
+            MODEL_NAME=chatglm3-6b
+            API_KEY=your_api_key_here
+            ```
+            
+            ## 文档 📚
             详细使用说明请查看 [README.md](https://github.com/zyjarge/aido/blob/master/README.md)
+            
+            ## 反馈与支持 💬
+            如有问题或建议，欢迎提交 [Issue](https://github.com/zyjarge/aido/issues)
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }} 
