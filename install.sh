@@ -200,9 +200,22 @@ setup_config() {
     
     if [ ! -f "$config_file" ]; then
         info "创建默认配置文件..."
-        echo "LOG_LEVEL=CRITICAL" > "$config_file"
-        echo "# DEEPSEEK_API_KEY=your_api_key_here" >> "$config_file"
-        warn "请记得在 $config_file 中设置你的 DEEPSEEK_API_KEY"
+        cat > "$config_file" << EOL
+# API服务配置
+# DeepSeek API配置示例：
+BASE_URL=https://api.deepseek.com/v1
+MODEL_NAME=deepseek-chat
+API_KEY=your_api_key_here
+
+# SiliconFlow API配置示例：
+# BASE_URL=https://api.siliconflow.com/v1
+# MODEL_NAME=chatglm3-6b
+# API_KEY=your_api_key_here
+
+# 日志级别：DEBUG, INFO, WARNING, ERROR, CRITICAL
+LOG_LEVEL=CRITICAL
+EOL
+        warn "请记得在 $config_file 中设置你的 API 配置"
     fi
     
     # 设置配置文件权限
@@ -240,7 +253,10 @@ main() {
     echo "启动脚本: $HOME/.local/bin/aido"
     
     echo -e "\n${GREEN}使用说明：${NC}"
-    echo "1. 请确保在 .env.local 中设置了 DEEPSEEK_API_KEY"
+    echo "1. 请在 .env.local 中配置以下信息："
+    echo "   - BASE_URL: API服务地址"
+    echo "   - MODEL_NAME: 使用的模型名称"
+    echo "   - API_KEY: API密钥"
     echo "2. 如果命令 'aido' 无法运行，请重新打开终端或运行："
     echo "   source ~/.bashrc 或 source ~/.zshrc"
     echo "3. 现在可以在任何目录使用 'aido' 命令了"

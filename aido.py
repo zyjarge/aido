@@ -28,9 +28,18 @@ def get_env_file_path():
     if not os.path.exists(env_file):
         logging.warning(f"配置文件不存在: {env_file}")
         with open(env_file, 'w') as f:
+            f.write('# API服务配置\n')
+            f.write('# DeepSeek API配置示例：\n')
+            f.write('BASE_URL=https://api.deepseek.com/v1\n')
+            f.write('MODEL_NAME=deepseek-chat\n')
+            f.write('API_KEY=your_api_key_here\n\n')
+            f.write('# SiliconFlow API配置示例：\n')
+            f.write('# BASE_URL=https://api.siliconflow.com/v1\n')
+            f.write('# MODEL_NAME=chatglm3-6b\n')
+            f.write('# API_KEY=your_api_key_here\n\n')
+            f.write('# 日志级别\n')
             f.write('LOG_LEVEL=CRITICAL\n')
-            f.write('# DEEPSEEK_API_KEY=your_api_key_here\n')
-        logging.warning(f"已创建默认配置文件，请设置你的 API key")
+        logging.warning(f"已创建默认配置文件，请设置你的 API 配置")
     
     return env_file
 
